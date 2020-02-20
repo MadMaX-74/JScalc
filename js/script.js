@@ -21,7 +21,10 @@ const startButton = document.querySelector('.start-button'),
     formCalculate = document.querySelector('.form-calculate'),
     endButton = document.querySelector('.end-button'),
     total = document.querySelector('.total'),
-    fastRange = document.querySelector('.fast-range');
+    fastRange = document.querySelector('.fast-range'),
+    totalPriceSum = document.querySelector('.total_price__sum'),
+    adapt = document.getElementById('adapt'),
+    mobileTemplates = document.getElementById('mobileTemplates');
 
     
 function showElem(elem) {
@@ -34,6 +37,10 @@ function hideElem(elem) {
 }
 
 function priceCalculation(elem) {
+    let result = 0,
+        index = 0,
+        options = [];
+
     if (elem.name === 'whichSite') {
         for (const item of formCalculate.elements){
             if (item.type === 'checkbox') {
@@ -42,15 +49,51 @@ function priceCalculation(elem) {
         }
         hideElem(fastRange);
     }
+    
+    for (const item of formCalculate.elements){
+        if (item.name === 'whichSite' && item.checked) {
+            index = DATA.whichSite.indexOf(item.value);            
+        }else if (item.classList.contains('calc-handler') && item.checked){
+            options.push(item.value);
+        }
+    }
+    
+    options.forEach(function(key){
+        if (typeof(DATA[key]) === 'number') {
+            if (key === 'sendOrder'){
+                result += DATA[key];
+            }else{
+                result += DATA.price[index] * DATA[key] / 100;
+            }
+        }else{
+            if(key === 'desktopTemplates'){
+                result += DATA.price[index] * DATA[key][index] / 100;
+            }else{
+                result += DATA[key][index]; 
+            }
+        }
+    })
+
+    result += DATA.price[index];
+
+    totalPriceSum.textContent = result;
 }
 
 function handlerCallBackForm(event) {
     let target = event.target;
+
+    if (adapt.checked) {
+        mobileTemplates.disabled = false;   
+    }else{
+        mobileTemplates.disabled = true;
+        mobileTemplates.checked = false;
+    }
+
     if (target.classList.contains('want-faster')) {
         target.checked ? showElem(fastRange) : hideElem(fastRange);
     }
 
-    if (target.classList.contains('calc-hander')){
+    if (target.classList.contains('calc-handler')) {
         priceCalculation(target);
     }
 }
